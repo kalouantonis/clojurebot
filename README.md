@@ -11,6 +11,15 @@ Download from http://example.com/FIXME.
 FIXME: explanation
 
     $ java -jar clojurebot-0.1.0-standalone.jar [args]
+    
+### TODO
+
+1. Add reloadable connections (for REPL use and such)
+
+### Plugins to support
+1. Allowing adding and removing of TODO's
+2. Clojure eval
+3. Clojure docs lookup
 
 ## Options
 

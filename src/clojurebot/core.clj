@@ -1,10 +1,11 @@
 (ns clojurebot.core
   (:gen-class)
+  (:require [clojure.string :as string])
   (:import [java.net Socket]
            [java.io PrintWriter InputStreamReader BufferedReader]))
 
 (def freenode {:name "irc.freenode.net" :port 6667})
-(def user {:name "Slacker's clojure bot" :nick "lispbot"})
+(def user {:name "The lispiest lisp bot" :nick "lispbot"})
 
 (declare conn-handler)
 
@@ -12,7 +13,7 @@
   (let [socket (Socket. (:name server) (:port server))
         in (BufferedReader. (InputStreamReader. (.getInputStream socket)))
         out (PrintWriter. (.getOutputStream socket))
-        conn (ref {:in in :out out})]
+        conn (ref {:in in :out out :active? false :channels #{}})]
     (.start (Thread. #(conn-handler conn)))
     conn))
 
@@ -24,10 +25,15 @@
 (defn kill
   "Kill the given connection. This does not gracefully quit."
   [conn]
-  (dosync (alter conn merge {:exit true})))
+  (dosync (alter conn merge {:active? false})))
+
+(defn message [conn target & s]
+  (->> (string/join " " s)
+       (str "PRIVMSG " target " :")
+       (write conn)))
 
 (defn conn-handler [conn]
-  (while (nil? (:exit @conn))
+  (while (:active? @conn)
     (let [msg (.readLine (:in @conn))]
       (println msg)
       (cond
@@ -35,8 +41,7 @@
         (kill conn)
         (re-find #"PRIVMSG (.*) :lispbot: (.*)" msg)
         (let [[_ channel msg] (re-find #"PRIVMSG (.*) :lispbot: (.*)" msg)]
-          (println "Writing to channel" channel "and msg" msg)
-          (write conn (str "PRIVMSG " channel " " msg)))
+          (message conn channel msg))
         (re-find #"^PING" msg)
         (write conn (str "PONG " (re-find #":.*" msg)))))))
 
@@ -50,11 +55,11 @@
 
 (defn join [conn channel]
   (write conn (str "JOIN " channel))
-  #_(dosync (alter conn update :channels conj channel)))
+  (dosync (alter conn update :channels conj channel)))
 
 (defn part [conn channel]
   (write conn (str "PART " channel))
-  #_(dosync (alter conn update :channels dissoc)))
+  (dosync (alter conn update :channels disj channel)))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -62,5 +67,5 @@
   (let [irc (connect freenode)]
     (login irc user)
     (write irc "JOIN ##system32")
-    (write irc "Hello there!")
+    (message irc "##system32" "Hello there!")
     (write irc "QUIT")))
