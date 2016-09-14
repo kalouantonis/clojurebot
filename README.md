@@ -1,17 +1,33 @@
 # clojurebot
 
-FIXME: description
+An IRC bot with a bunch of (arguably) useful commands.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Building from source is the only available method at the moment.
 
 ## Usage
 
-FIXME: explanation
+Run the compiled JAR of the clojurebot like so:
 
-    $ java -jar clojurebot-0.1.0-standalone.jar [args]
+    $ java -jar clojurebot-0.1.0-standalone.jar
     
+To run using leiningen use:
+
+    $ lein run
+    
+## Options
+
+FIXME: listing of options this app accepts.
+
+## Examples
+
+TODO: Add an example of how to add a plugin.
+
+### Bugs
+
+...
+
 ### TODO
 
 1. Add reloadable connections (for REPL use and such)
@@ -20,22 +36,6 @@ FIXME: explanation
 1. Allowing adding and removing of TODO's
 2. Clojure eval
 3. Clojure docs lookup
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
 
 ## License
 
