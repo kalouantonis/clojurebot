@@ -63,7 +63,7 @@
   (write conn (str "USER " (:nick user) " 0 * :" (:name user))))
 
 (defn quit [conn]
-  ;; This will send a :Closing link: message
+  ;; This cause a :Closing link: message to be sent
   (write conn "QUIT"))
 
 (defn join [conn channel]
