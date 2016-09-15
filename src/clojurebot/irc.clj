@@ -1,4 +1,7 @@
-(ns clojurebot.connection
+;; Utilities for creating and working with connections to IRC networks.
+;;
+;; Author: Antonis Kalou
+(ns clojurebot.irc
   (:require [clojure.string :as string])
   (:import [java.net Socket]
            [java.io PrintWriter InputStreamReader BufferedReader]))
@@ -41,7 +44,7 @@
       (cond
         (re-find #"^ERROR :Closing Link:" msg)
         (kill conn)
-        (re-find #"PRIVMSG (.*) :(.*)" msg)
+        (re-find #"PRIVMSG .* :@.*" msg)
         ;; TODO: Add configurable prefix
         (let [[_ channel msg] (re-find #"PRIVMSG (.*) :@(.*)" msg)]
           (message conn channel ((:msg-handler @conn) channel msg)))
@@ -50,7 +53,7 @@
 
 (defn connect [server msg-handler]
   ;; TODO: Close socket on finish
-  (let [socket (Socket. (:name server) (:port server))
+  (let [socket (Socket. (:host server) (:port server))
         in (BufferedReader. (InputStreamReader. (.getInputStream socket)))
         out (PrintWriter. (.getOutputStream socket))
         conn (ref (make-connection in out msg-handler))]

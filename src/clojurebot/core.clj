@@ -1,9 +1,16 @@
+;; Application entry point and main app logic.
+;;
+;; Author: Antonis Kalou
 (ns clojurebot.core
   (:gen-class)
   (:require [clojail.core :as jail]
             [clojail.testers :as testers]
-            [clojurebot.connection :as irc]))
+            [clojure.edn :as edn]
+            [clojurebot.irc :as irc]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Evaluating in a sandboxed environment
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def sandbox (jail/sandbox testers/secure-tester :timeout 5000))
 
 (defn eval-message
@@ -15,38 +22,70 @@
     (catch Exception e
       (.getMessage e))))
 
-(defn handle-message [channel msg]
-  (cond
-    (nil? msg)
-    msg
-    (re-find #"^time$" msg)
-    (.toString (java.util.Date.))
-    (re-find #"^echo (.*)" msg)
-    (last (re-find #"^echo (.*)" msg))
-    (re-find #"^amirite\?$" msg)
-    "Yep, you're the most correct of them all."
-    (re-find #"^coin$" msg)
-    (if (zero? (rand-int 2)) "Heads" "Tails")
-    (re-find #"^eval (.*)" msg)
-    (str "=> " (eval-message (last (re-find #"^eval (.*)" msg))))
-    (re-find #"^doc (.*)$" msg)
-    (let [doc-name (last (re-find #"^doc (.*)" msg))]
-      (->> (symbol doc-name)
-           (resolve)
-           (meta)
-           (:doc)))
-    :else "ERROR: Unrecognised command"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Command handling
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def commands (atom {}))
 
-;; TODO: Load from config
-(def freenode {:name "irc.freenode.net" :port 6667})
-(def user {:name "The lispiest lisp bot" :nick "lispbot"})
+(defn reg-command
+  "Register a new command handler. When an IRC user sends a private
+  message containing"
+  [name handler]
+  (swap! commands assoc name handler))
 
+(defn handle-message [chan msg]
+  (let [[_ cmd args] (last (re-find #"^(\w+) (.*)" msg))
+        error-handler (fn [_] "ERROR: Unrecognised command")]
+    (println "Handling message:" msg)
+    ((get @commands cmd error-handler) args)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Command definitions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(reg-command
+ "time"
+ (fn [_]
+   (.toString (java.util.Date.))))
+
+(reg-command
+ "echo"
+ identity)
+
+(reg-command
+ "amirite?"
+ (constantly
+  "Yep, you're the most correct of them all."))
+
+(reg-command
+ "coin"
+ (fn [_]
+   (if (zero? (rand-int 2))
+     "Heads"
+     "Tails")))
+
+(reg-command
+ "eval"
+ (fn [msg]
+   (str "=> " (pr-str (eval-message msg)))))
+
+(reg-command
+ "doc"
+ (fn [sym-name]
+   (->> (symbol sym-name)
+        (resolve)
+        (meta)
+        (:doc))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Entry point
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn -main
   "App entry point"
   [& args]
-  (let [irc (irc/connect freenode handle-message)]
-    (irc/login irc user)
+  (let [config (edn/read-string (slurp "resources/config.edn"))
+        conn (irc/connect (:server config) handle-message)]
+    (irc/login conn (:user config))
     (Thread/sleep 3000) ;; Just wait for a connection
-    (irc/join irc "##system32")
-    (irc/message irc "##system32" "Hello there!")
-    irc))
+    (doseq [chan (:channels config)]
+      (irc/join conn "##system32"))
+    (irc/message conn "##system32" "Hello there!")))
