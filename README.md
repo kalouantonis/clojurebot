@@ -27,13 +27,13 @@ Configuration is provided in `resources/config.edn`.
 
 ## Available commands
 
-`echo` - Repeats the message after echo. E.g. `echo Say something`
-`time` - Prints the clojurebot's current local time.
-`amirite?` - Confirms your correctness.
-`coin` - A heads/tails coin toss.
+`echo` - Repeats the message after echo. E.g. `echo Say something`  
+`time` - Prints the clojurebot's current local time.  
+`amirite?` - Confirms your correctness.  
+`coin` - A heads/tails coin toss.  
 `eval` - Runs (a limited subset of) the clojure evaluator on the given string.
-E.g. `eval (+ 1 2)` will output `3`. (I hope...)
-`doc` - Looks up the documentation for the given symbol in clojure.core.
+E.g. `eval (+ 1 2)` will output `3`. (I hope...)  
+`doc` - Looks up the documentation for the given symbol in clojure.core.  
 
 ## Adding Plugins
 
