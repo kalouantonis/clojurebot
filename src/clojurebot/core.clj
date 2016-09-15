@@ -36,7 +36,6 @@
 (defn handle-message [chan msg]
   (let [[_ cmd args] (last (re-find #"^(\w+) (.*)" msg))
         error-handler (fn [_] "ERROR: Unrecognised command")]
-    (println "Handling message:" msg)
     ((get @commands cmd error-handler) args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
