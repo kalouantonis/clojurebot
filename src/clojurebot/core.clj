@@ -6,7 +6,9 @@
   (:require [clojail.core :as jail]
             [clojail.testers :as testers]
             [clojure.edn :as edn]
-            [clojurebot.irc :as irc]))
+            [clojure.java.io :as io]
+            [clojurebot.irc :as irc]
+            [clojure.string :as string]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Evaluating in a sandboxed environment
@@ -23,6 +25,11 @@
     (catch Exception e
       (.getMessage e))))
 
+(defn parse-message
+  [msg]
+  (let [[cmd & args] (string/split msg #" ")]
+    [cmd (string/join " " args)]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Command handling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,9 +42,9 @@
   (swap! commands assoc name handler))
 
 (defn handle-message [chan msg]
-  (let [[_ cmd args] (last (re-find #"^(\w+) (.*)" msg))
-        error-handler (fn [_] "ERROR: Unrecognised command")]
-    ((get @commands cmd error-handler) args)))
+  (let [[cmd msg] (parse-message msg)
+        error-handler (constantly "ERROR: Unrecognised command")]
+    ((get @commands cmd error-handler) msg)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Command definitions
@@ -79,13 +86,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn load-config [path]
+  (-> (io/resource path)
+      (slurp)
+      (edn/read-string)))
+
 (defn -main
   "App entry point"
   [& args]
-  (let [config (edn/read-string (slurp "resources/config.edn"))
+  (let [config (load-config "config.edn")
         conn (irc/connect (:server config) handle-message)]
     (irc/login conn (:user config))
-    (Thread/sleep 3000) ;; Just wait for a connection
     (doseq [chan (:channels config)]
       (irc/join conn "##system32"))
     (irc/message conn "##system32" "Hello there!")))

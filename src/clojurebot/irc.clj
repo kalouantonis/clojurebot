@@ -36,7 +36,6 @@
   [conn]
   (dosync (alter conn merge {:active? false})))
 
-;; TODO: Make reloadable
 (defn- conn-handler [conn]
   (while (:active? @conn)
     (let [msg (.readLine (:in @conn))]
