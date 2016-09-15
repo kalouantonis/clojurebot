@@ -37,7 +37,7 @@
 
 (defn reg-command
   "Register a new command handler. When an IRC user sends a private
-  message containing"
+  message containing a string the same as the command name."
   [name handler]
   (swap! commands assoc name handler))
 
