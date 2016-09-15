@@ -27,6 +27,10 @@ Configuration is provided in `resources/config.edn`.
 
 ## Available commands
 
+All commands are prefixed with `@`, so to run for example `time`, you just
+send a message to the channel containing `@time`. In the future, I plan to
+add support for changing the prefix.
+
 `echo` - Repeats the message after echo. E.g. `echo Say something`  
 `time` - Prints the clojurebot's current local time.  
 `amirite?` - Confirms your correctness.  
