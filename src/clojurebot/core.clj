@@ -13,12 +13,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def sandbox (jail/sandbox testers/secure-tester :timeout 5000))
 
-(defn eval-message
-  "Evaluate a message received from IRC."
-  [msg]
+(defn eval-string
+  "Attempt to evaluate a string. If an exception is thrown,
+  the message text is returned."
+  [s]
   (try
     (binding [*read-eval* false]
-      (sandbox (read-string msg)))
+      (sandbox (read-string s)))
     (catch Exception e
       (.getMessage e))))
 
@@ -65,7 +66,7 @@
 (reg-command
  "eval"
  (fn [msg]
-   (str "=> " (pr-str (eval-message msg)))))
+   (str "=> " (pr-str (eval-string msg)))))
 
 (reg-command
  "doc"
