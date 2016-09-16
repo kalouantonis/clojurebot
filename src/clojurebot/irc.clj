@@ -3,8 +3,8 @@
 ;; Author: Antonis Kalou
 (ns clojurebot.irc
   (:require [clojure.string :as string])
-  (:import [java.net Socket]
-           [java.io PrintWriter InputStreamReader BufferedReader]))
+  (:import (java.net Socket)
+           (java.io PrintWriter InputStreamReader BufferedReader)))
 
 (defrecord Connection [in             ;; IRC input stream
                        out            ;; IRC output stream
