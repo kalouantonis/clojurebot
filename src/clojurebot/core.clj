@@ -67,7 +67,8 @@
   "work"
   #(cond cmd
       "init" "Bleep bloop, initializing work..."
-      "end"  "Bleep bloop, work terminated"))
+      "end"  "Bleep bloop, work terminated"
+      :else  "Get back to work!"))
 
 (reg-command
  "coin"
