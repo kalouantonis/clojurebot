@@ -65,7 +65,7 @@
 
 (reg-command
   "work"
-  #(cond cmd
+  #(cond %
       "init" "Bleep bloop, initializing work..."
       "end"  "Bleep bloop, work terminated"
       :else  "Get back to work!"))
