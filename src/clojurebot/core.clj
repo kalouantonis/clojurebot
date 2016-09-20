@@ -64,6 +64,12 @@
   "Yep, you're the most correct of them all."))
 
 (reg-command
+  "work"
+  #(cond cmd
+      "init" "Bleep bloop, initializing work..."
+      "end"  "Bleep bloop, work terminated"))
+
+(reg-command
  "coin"
  (fn [_]
    (if (zero? (rand-int 2))
