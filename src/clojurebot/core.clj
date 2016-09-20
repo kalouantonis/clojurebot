@@ -65,10 +65,10 @@
 
 (reg-command
   "work"
-  #(cond %
+  #(case %
       "init" "Bleep bloop, initializing work..."
       "end"  "Bleep bloop, work terminated"
-      :else  "Get back to work!"))
+      "Get back to work!"))
 
 (reg-command
  "coin"
