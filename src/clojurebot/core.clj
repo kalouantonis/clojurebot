@@ -85,10 +85,12 @@
 (reg-command
  "doc"
  (fn [sym-name]
-   (->> (symbol sym-name)
+   (if (nil? sym-name)
+    (println "ERROR: Unrecognised command")
+    (->> (symbol sym-name)
         (resolve)
         (meta)
-        (:doc))))
+        (:doc))))) 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
