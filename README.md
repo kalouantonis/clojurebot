@@ -11,7 +11,7 @@ pre-compiled JAR's.
 
 Run the compiled JAR of the clojurebot like so:
 
-    $ java -jar clojurebot-0.1.0-standalone.jar
+    $ java -jar clojurebot-<version>-standalone.jar
     
 To compile the JAR itself, use: 
     
