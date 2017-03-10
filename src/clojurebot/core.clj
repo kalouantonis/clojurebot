@@ -87,9 +87,9 @@
   (fn [sym-name]
     (if sym-name
       (->> (symbol sym-name)
-       (resolve)
-       (meta)
-       (:doc))
+           (resolve)
+           (meta)
+           (:doc))
       (println "ERROR: No arguments provided"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
