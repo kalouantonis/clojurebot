@@ -83,12 +83,14 @@
    (str "=> " (pr-str (eval-string msg)))))
 
 (reg-command
- "doc"
- (fn [sym-name]
-   (->> (symbol sym-name)
-        (resolve)
-        (meta)
-        (:doc))))
+  "doc"
+  (fn [sym-name]
+    (if sym-name
+      (->> (symbol sym-name)
+           (resolve)
+           (meta)
+           (:doc))
+      (println "ERROR: No arguments provided"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
