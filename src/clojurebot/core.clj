@@ -41,6 +41,11 @@
   [name handler]
   (swap! commands assoc name handler))
 
+(defn replace-nl
+  "Replace occurences of \n from s with whitespace, so it doesn't trim the IRC output."
+  [s]
+  (clojure.string/replace s "\n " " "))
+
 (defn handle-message [chan msg]
   (let [[cmd msg] (parse-message msg)
         error-handler (constantly "ERROR: Unrecognised command")]
@@ -87,9 +92,10 @@
   (fn [sym-name]
     (if (not (empty? sym-name))
       (->> (symbol sym-name)
-           (resolve)
+           (resolve)                          
            (meta)
-           (:doc))
+           (#(format "::: %s ::: \"%s\" " (:arglists %1) (:doc %1)))
+           (replace-nl))
       "ERROR: No arguments provided")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
