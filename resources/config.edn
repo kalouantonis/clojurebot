@@ -1,4 +1,5 @@
 {:server {:host "irc.freenode.net" :port 6667}
- :user {:name "The lispiest lisp bot" :nick "lispbot"}
+ :user {:name "The lispiest lisp bot" :nick "lispybot-test"}
+ :greeting "Hello there I am lispbot!"
  ;; Autojoin channels
- :channels #{"##system32"}}
+ :channels #{"##lispbot-testing"}}

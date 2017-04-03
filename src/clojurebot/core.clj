@@ -85,12 +85,12 @@
 (reg-command
   "doc"
   (fn [sym-name]
-    (if sym-name
+    (if (not (empty? sym-name))
       (->> (symbol sym-name)
            (resolve)
            (meta)
            (:doc))
-      (println "ERROR: No arguments provided"))))
+      "ERROR: No arguments provided")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
@@ -107,5 +107,6 @@
         conn (irc/connect (:server config) handle-message)]
     (irc/login conn (:user config))
     (doseq [chan (:channels config)]
-      (irc/join conn "##system32"))
-    (irc/message conn "##system32" "Hello there!")))
+      (irc/join conn chan)
+      (irc/message conn chan (:greeting config)))))
+    
