@@ -93,6 +93,9 @@
     (if (not (empty? sym-name))
       (->> (symbol sym-name)
            (resolve)                          
+           ;; TODO: If sym-name is not a valid symbol resolve returns nil
+           ;; find a way to skip the forms below and show an error like
+           ;; Error: symbol is not valid
            (meta)
            (#(format "::: %s ::: \"%s\" " (:arglists %1) (:doc %1)))
            (replace-nl))
