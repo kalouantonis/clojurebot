@@ -41,10 +41,14 @@
   [name handler]
   (swap! commands assoc name handler))
 
-(defn replace-nl
+(defn replace-ws
   "Replace occurences of \n from s with whitespace, so it doesn't trim the IRC output."
   [s]
-  (clojure.string/replace s "\n " " "))
+  (clojure.string/replace s #"\s+" " "))
+
+(defn doc->string
+  [s]
+  (format "%s ::: %s" (:arglists s) (:doc s)))
 
 (defn handle-message [chan msg]
   (let [[cmd msg] (parse-message msg)
@@ -87,19 +91,27 @@
  (fn [msg]
    (str "=> " (pr-str (eval-string msg)))))
 
+; (reg-command
+;   "doc"
+;   (fn [sym-name]
+;     (if (not (clojure.string/blank? sym-name))
+;         (->> (symbol sym-name)
+;              (resolve)
+;              (meta)
+;              (doc->string)
+;              (replace-ws))
+;         "ERROR: No arguments provided")))
+
 (reg-command
   "doc"
   (fn [sym-name]
-    (if (not (empty? sym-name))
-      (->> (symbol sym-name)
-           (resolve)                          
-           ;; TODO: If sym-name is not a valid symbol resolve returns nil
-           ;; find a way to skip the forms below and show an error like
-           ;; Error: symbol is not valid
-           (meta)
-           (#(format "::: %s ::: \"%s\" " (:arglists %1) (:doc %1)))
-           (replace-nl))
-      "ERROR: No arguments provided")))
+    (if (not (clojure.string/blank? sym-name))
+        (->> (if-let [sym (symbol sym-name)]
+          (resolve)
+          (meta)
+          (doc->string)
+          (replace-ws)))
+        "Error: Symbol is not valid")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
