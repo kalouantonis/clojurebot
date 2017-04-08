@@ -41,6 +41,15 @@
   [name handler]
   (swap! commands assoc name handler))
 
+(defn replace-ws
+  "Replace occurences of \n from s with whitespace, so it doesn't trim the IRC output."
+  [s]
+  (clojure.string/replace s #"\s+" " "))
+
+(defn doc->string
+  [s]
+  (format "%s ::: %s" (:arglists s) (:doc s)))
+
 (defn handle-message [chan msg]
   (let [[cmd msg] (parse-message msg)
         error-handler (constantly "ERROR: Unrecognised command")]
@@ -85,12 +94,14 @@
 (reg-command
   "doc"
   (fn [sym-name]
-    (if sym-name
-      (->> (symbol sym-name)
-           (resolve)
-           (meta)
-           (:doc))
-      (println "ERROR: No arguments provided"))))
+    (if (not (clojure.string/blank? sym-name))
+        (if-let [sym (resolve (symbol sym-name))]
+          (->> sym
+               (meta)
+               (doc->string)
+               (replace-ws))
+          (str "Error: No symbol for " sym-name))
+        "Error: No arguments provided")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
@@ -107,5 +118,6 @@
         conn (irc/connect (:server config) handle-message)]
     (irc/login conn (:user config))
     (doseq [chan (:channels config)]
-      (irc/join conn "##system32"))
-    (irc/message conn "##system32" "Hello there!")))
+      (irc/join conn chan)
+      (irc/message conn chan (:greeting config)))))
+    
