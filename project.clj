@@ -1,4 +1,4 @@
-(defproject clojurebot "0.1.1"
+(defproject clojurebot "0.1.2"
   :description "An IRC bot with a bunch of (arguably) useful commands."
   :url "https://github.com/kalouantonis/clojurebot"
   :license {:name "Eclipse Public License"
