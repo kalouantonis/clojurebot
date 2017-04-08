@@ -91,27 +91,17 @@
  (fn [msg]
    (str "=> " (pr-str (eval-string msg)))))
 
-; (reg-command
-;   "doc"
-;   (fn [sym-name]
-;     (if (not (clojure.string/blank? sym-name))
-;         (->> (symbol sym-name)
-;              (resolve)
-;              (meta)
-;              (doc->string)
-;              (replace-ws))
-;         "ERROR: No arguments provided")))
-
 (reg-command
   "doc"
   (fn [sym-name]
     (if (not (clojure.string/blank? sym-name))
-        (->> (if-let [sym (symbol sym-name)]
-          (resolve)
-          (meta)
-          (doc->string)
-          (replace-ws)))
-        "Error: Symbol is not valid")))
+        (if-let [sym (resolve (symbol sym-name))]
+          (->> sym
+               (meta)
+               (doc->string)
+               (replace-ws))
+          (str "Error: No symbol for " sym-name))
+        "Error: No arguments provided")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
