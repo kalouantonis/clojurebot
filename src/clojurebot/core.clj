@@ -103,7 +103,7 @@
           (str "Error: No symbol for " sym-name))
         "Error: No arguments provided")))
 
-(reg-commend
+(reg-command
  "d20"
  (fn [n]
      (if (< n 0)
