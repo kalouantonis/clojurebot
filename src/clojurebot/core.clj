@@ -103,6 +103,17 @@
           (str "Error: No symbol for " sym-name))
         "Error: No arguments provided")))
 
+(reg-commend
+ "d20"
+ (fn [n]
+     (if (< n 0)
+       "You can't roll a negative amount of dice, man"
+       (str "You rolled a "
+            (->> #(+ (rand-int 20) 1)
+                 (repeatedly)
+                 (take n)
+                 (string/join " and a "))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -120,4 +131,3 @@
     (doseq [chan (:channels config)]
       (irc/join conn chan)
       (irc/message conn chan (:greeting config)))))
-    
