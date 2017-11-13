@@ -7,6 +7,7 @@
             [clojail.testers :as testers]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.core.match :refer [match]]
             [clojurebot.irc :as irc]
             [clojure.string :as string]))
 
@@ -103,16 +104,33 @@
           (str "Error: No symbol for " sym-name))
         "Error: No arguments provided")))
 
+(defn- parse-number-of-dice
+  [n]
+  (if (nil? n) [:ok 1]
+      (try
+        (let [result (Integer/parseInt n)]
+          (cond
+            (< result 0) [:error "You can't roll a negative amount of dice, man"]
+            (= result 0) [:error "You  want to roll zero dice? Okay, you rolled nothing..."]
+            :else [:ok result]))
+        (catch java.lang.NumberFormatException _
+          [:error (str n " is not a number! Please give me a number of dice to roll.")])
+        (catch java.lang.ClassCastException _
+          [:error (str "I'm expecting a number-string as input, but you've given me " n ", with " (type n))]))))
+
 (reg-command
  "d20"
  (fn [n]
-     (if (< n 0)
-       "You can't roll a negative amount of dice, man"
-       (str "You rolled a "
-            (->> #(+ (rand-int 20) 1)
-                 (repeatedly)
-                 (take n)
-                 (string/join " and a "))))))
+   (match (parse-number-of-dice n)
+          [:error err] err
+          [:ok x] (let [nums (->> #(+ (rand-int 20) 1)
+                                  (repeatedly)
+                                  (take x))]
+                    (str "You rolled "
+                         (string/join " and " nums)
+                         (if (> x 1)
+                           (str ", totalling " (reduce + 0 nums)))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Entry point
